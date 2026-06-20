@@ -60,8 +60,12 @@ function parseFeed(xml, limit = 5) {
 const feeds = {
   architect: [
     { name: 'Google News Architecture', url: 'https://news.google.com/rss/search?q=software+architecture+clean+code+design+patterns&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News Security Hardening', url: 'https://news.google.com/rss/search?q=software+security+hardening+OR+secure+coding+practices&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News Accessibility a11y', url: 'https://news.google.com/rss/search?q=web+accessibility+a11y+standards+compliance&hl=es-419&gl=US&ceid=US:es' },
     { name: 'Dev.to Software Engineering', url: 'https://dev.to/feed/tag/softwareengineering' },
-    { name: 'Dev.to Clean Code', url: 'https://dev.to/feed/tag/cleancode' }
+    { name: 'Dev.to Clean Code', url: 'https://dev.to/feed/tag/cleancode' },
+    { name: 'Dev.to Security', url: 'https://dev.to/feed/tag/security' },
+    { name: 'Dev.to Testing', url: 'https://dev.to/feed/tag/testing' }
   ],
   cfo: [
     { name: 'Google News Tokenomics', url: 'https://news.google.com/rss/search?q=llm+token+cost+OR+prompt+caching+OR+ai+api+pricing&hl=es-419&gl=US&ceid=US:es' },
@@ -70,17 +74,29 @@ const feeds = {
   ],
   orchestrator: [
     { name: 'Google News MCP & DevOps', url: 'https://news.google.com/rss/search?q=model+context+protocol+OR+mcp+server+OR+devops+automation&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News MCP Tools', url: 'https://news.google.com/rss/search?q=model+context+protocol+servers+github+mcp+tools&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News CLI Automation', url: 'https://news.google.com/rss/search?q=cli+tool+design+terminal+automation+shell+scripting&hl=es-419&gl=US&ceid=US:es' },
     { name: 'Dev.to DevOps', url: 'https://dev.to/feed/tag/devops' },
-    { name: 'Dev.to Tooling', url: 'https://dev.to/feed/tag/tooling' }
+    { name: 'Dev.to Tooling', url: 'https://dev.to/feed/tag/tooling' },
+    { name: 'Dev.to Sysadmin', url: 'https://dev.to/feed/tag/sysadmin' }
   ],
   niche_researcher: [
-    { name: 'Google News LLMs & Claude', url: 'https://news.google.com/rss/search?q=claude+ai+OR+local+llama+OR+deepseek+OR+open+source+llm&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News Hacker News AI', url: 'https://news.google.com/rss/search?q=site:news.ycombinator.com+LLM+OR+Claude+OR+agents+OR+MCP&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News Anthropic Official', url: 'https://news.google.com/rss/search?q=site:anthropic.com+Claude+OR+model+context+protocol&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News OpenAI Official', url: 'https://news.google.com/rss/search?q=site:openai.com+GPT+OR+agents+OR+safety&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Google News DeepMind Official', url: 'https://news.google.com/rss/search?q=site:deepmind.google+OR+site:research.google+AI+OR+agents&hl=es-419&gl=US&ceid=US:es' },
     { name: 'Google News YouTube AI', url: 'https://news.google.com/rss/search?q=site:youtube.com+llm+agents+OR+claude+code+OR+mcp+server&hl=es-419&gl=US&ceid=US:es' },
     { name: 'Google News GitHub Repos', url: 'https://news.google.com/rss/search?q=site:github.com+model+context+protocol+OR+mcp+server+OR+claude+code&hl=es-419&gl=US&ceid=US:es' },
+    { name: 'Hugging Face Blog', url: 'https://huggingface.co/blog/feed.xml' },
+    { name: 'Simon Willison LLMs Blog', url: 'https://simonwillison.net/categories/llms/atom.xml' },
+    { name: 'LangChain Blog', url: 'https://blog.langchain.dev/rss/' },
+    { name: 'LlamaIndex Blog', url: 'https://blog.llamaindex.ai/feed' },
+    { name: 'TechCrunch AI', url: 'https://techcrunch.com/category/artificial-intelligence/feed/' },
     { name: 'Reddit ClaudeAI', url: 'https://www.reddit.com/r/ClaudeAI/new.rss' },
     { name: 'Reddit LocalLLaMA', url: 'https://www.reddit.com/r/LocalLLaMA/new.rss' },
     { name: 'Reddit OpenAI', url: 'https://www.reddit.com/r/openai/new.rss' },
-    { name: 'Reddit Singularity', url: 'https://www.reddit.com/r/singularity/new.rss' }
+    { name: 'Reddit Singularity', url: 'https://www.reddit.com/r/singularity/new.rss' },
+    { name: 'Reddit Machine Learning', url: 'https://www.reddit.com/r/MachineLearning/new.rss' }
   ],
   comparative_researcher: [
     { name: 'Google News GraphRAG & Agents', url: 'https://news.google.com/rss/search?q=graphrag+OR+vector+databases+OR+competitor+ai+agents&hl=es-419&gl=US&ceid=US:es' },

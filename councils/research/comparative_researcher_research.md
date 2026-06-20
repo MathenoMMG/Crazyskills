@@ -1,6 +1,6 @@
 # Datos y Fuentes de Investigación (Scraped) — COMPARATIVE_RESEARCHER
 
-Última actualización: 2026-06-20 20:18:27
+Última actualización: 2026-06-20 20:22:19
 
 ## Fuentes Recientes
 
