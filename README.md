@@ -4,22 +4,21 @@ Este repositorio contiene la configuración consolidada, las skills personalizad
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ Arquitectura del Ecosistema
 
-El sistema opera mediante una estructura unificada en `%USERPROFILE%\.claude\` (compartida físicamente con `%USERPROFILE%\.gemini\config\skills` mediante un **Directory Junction Link** en Windows):
+El sistema opera mediante una estructura unificada en `%USERPROFILE%\.claude\` (compartida físicamente con `%USERPROFILE%\.gemini\config\skills` mediante un **Directory Junction Link** en Windows) y un sistema local de deliberación multi-agente en el proyecto:
 
 ```
-.claude/
-├── CLAUDE.md                   # Instrucciones globales e identidad visual anti-slop
-├── principles.md               # Principios globales de diseño (Lean Content, Pre-Flight, etc.)
-├── settings.json               # Configuración de hooks de ciclo de vida y MCP servers
-├── commands/                   # Definición de slash commands (/obs y /forge)
-├── hooks/
-│   ├── obsidian-capture.sh     # Gancho de pre-prompt que detecta correcciones
-│   ├── obsidian-flush.sh       # Gancho asíncrono que inicia la auto-consolidación
-│   ├── auto-forge.js           # Script en Node.js que migra observaciones a learnings.md
-│   └── block-dangerous.sh      # Firewall de comandos destructivos (rm -rf, sudo)
-└── skills/                     # 22 skills específicas de producción con learnings.md
+councils/                       # Sistema del Consejo Consultivo
+├── agents/                     # Personalidades e instrucciones de los 5 agentes
+│   ├── architect.md            # Software Architect (Patrón-Senior)
+│   ├── cfo.md                  # Financial / Lean Operations (Lean-CFO)
+│   ├── orchestrator.md         # Systems Integrator & Hook Engineer
+│   ├── niche_researcher.md     # Rastreador de tendencias de IA
+│   └── comparative_researcher.md # Analista comparativo y de integraciones
+├── investigaciones.md          # Bitácora comparativa con la competencia de IA
+├── run-council.js              # Script ejecutable para lanzar debates en caliente
+└── debates/                    # Transcripciones y actas de debates históricos
 ```
 
 ---
@@ -37,7 +36,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.gemini\config\skills" -Targ
 ```
 
 ### 3. Servidores MCP Globales
-El archivo de configuración de Claude (`.claude.json`) se actualiza para declarar los siguientes servidores:
+El archivo de configuración de Claude (`.claude.json`) se declara con:
 * `filesystem`: Acceso a archivos locales.
 * `memory`: Memoria global aislada.
 * `github`: Integración nativa con repositorios.
@@ -50,8 +49,21 @@ El archivo de configuración de Claude (`.claude.json`) se actualiza para declar
 
 El agente aprende y registra conocimiento de forma autónoma sin intervención del usuario:
 1. **Auto-Corrección:** El agente detecta cuando se autocorrige tras un fallo en caliente.
-2. **Alertas del Compilador:** Si falla el linter (`eslint`) o los tests unitarios, el error y su solución se registran en Engram.
+2. **Alertas del Compilador:** Si falla el linter o los tests unitarios, el error y su solución se registran en Engram.
 3. **Logbook Activo (`working.md`):** Cada proyecto mantiene un archivo `working.md` dinámico con el estado de tareas que sincroniza el progreso y evita tener que re-analizar directorios completos en nuevas sesiones.
+
+---
+
+## 🏛️ Sistema del Consejo Consultivo (Councils)
+
+El proyecto incluye un motor para debatir temas en caliente utilizando las personalidades locales de los 5 agentes. El sistema es autoevolutivo: los perfiles markdown de los agentes se actualizan y enriquecen de forma dinámica con el uso.
+
+### Cómo ejecutar un debate:
+Desde la terminal del proyecto, ejecuta:
+```bash
+node councils/run-council.js "optimizar cache de Next.js en produccion"
+```
+* **Resultado:** El script consolidará los perfiles locales de los agentes, formulará el prompt atómico, invocará al modelo CLI local (`opencode` o `claude`), mostrará el debate en vivo por consola y guardará la transcripción en un archivo Markdown bajo `councils/debates/debate_YYYYMMDD_HHMMSS.md`.
 
 ---
 
