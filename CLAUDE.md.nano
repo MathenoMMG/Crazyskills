@@ -1,0 +1,13 @@
+## Obsidian — meta-aprendizaje activo
+
+Cuando el usuario corrija output, diga "recuerda", "anota", "obs:", o exprese preferencia
+persistente → captura con obsidian-pulse (o directamente):
+  engram save --type observation --scope skill:[relevante] \
+    --title "Verbo+qué" --content "Qué · Por qué importa · Principio"
+
+Al cargar cualquier skill, lee también su learnings.md si existe.
+Al iniciar sesión de diseño/frontend: engram search --scope skill:frontend-design --limit 5
+
+Comandos rápidos: /obs → captura | /forge → evoluciona/crea skills desde Engram
+
+Principios globales activos: ver ~/.claude/principles.md
