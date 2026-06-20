@@ -47,9 +47,10 @@ El sistema está desplegado en la raíz global de Claude (`%USERPROFILE%\.claude
 - [x] Configuración de tareas programadas de Windows integradas en `setup.js`.
 
 ## Qué hace falta
-- [ ] Ejecutar el primer debate del consejo usando el script `run-council.js` o mediante Antigravity para validar su funcionamiento completo y la persistencia de datos.
+- [x] Ejecutar el primer debate del consejo usando el script `run-council.js` o mediante Antigravity para validar su funcionamiento completo y la persistencia de datos.
 - [ ] Monitorización de los primeros ciclos automáticos de `auto-forge.js` tras capturas reales de observaciones para verificar la resolución correcta en Engram.
 - [ ] Rellenar la comparativa cuantitativa y cualitativa de rendimiento dentro de una semana (2026-06-27).
 
 ## Qué está fallando
 - Ningún fallo detectado. Los scrapers y el script del council han sido probados con éxito.
+
