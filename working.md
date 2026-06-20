@@ -15,6 +15,8 @@ El sistema está desplegado en la raíz global de Claude (`%USERPROFILE%\.claude
   - 22 skills con manifiestos de reglas (`SKILL.md`) y delta de aprendizajes (`learnings.md`).
 - **Programador de Tareas**:
   - Tarea registrada `ObsidianWeeklyAudit` programada para ejecutarse los viernes a las 18:00 de forma silenciosa.
+- **`comparativa_rendimiento.md`**:
+  - Bitácora local para contrastar el consumo de tokens y la calidad de la IA a lo largo de una semana de uso activo.
 
 ## Qué hay
 - [x] Configuración de directrices globales y hooks de sistema en `settings.json` y `.claude.json`.
@@ -27,9 +29,11 @@ El sistema está desplegado en la raíz global de Claude (`%USERPROFILE%\.claude
 - [x] Enlace físico bidireccional (Directory Junction) entre la carpeta de skills de Antigravity y Claude Code.
 - [x] Empaquetado de scripts en `setup.js` para portabilidad del repositorio.
 - [x] Corrección en `weekly-audit.sh` para ignorar la salida "No memories found" de Engram y evitar archivos vacíos.
+- [x] Creación del archivo de bitácora `comparativa_rendimiento.md` con las estadísticas reales (Línea Base) cargadas.
 
 ## Qué hace falta
 - [ ] Monitorización de los primeros ciclos automáticos de `auto-forge.js` tras capturas reales de observaciones para verificar la resolución correcta en Engram.
+- [ ] Rellenar la comparativa cuantitativa y cualitativa de rendimiento dentro de una semana (2026-06-27).
 
 ## Qué está fallando
 - Ningún fallo detectado. Los scripts han sido probados y responden correctamente en el entorno de Git Bash de Windows.
