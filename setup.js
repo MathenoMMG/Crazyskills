@@ -319,7 +319,8 @@ if (os.platform() === 'win32') {
   try {
     const cmdDaily = `schtasks /create /tn "ObsidianDailyScraper" /tr "\\\"${nodeExe}\\\" \\\"${scrapeScript}\\\"" /sc daily /st 09:00 /f`;
     execSync(cmdDaily, { stdio: 'ignore' });
-    console.log('  -> Tarea programada "ObsidianDailyScraper" registrada/actualizada con éxito.');
+    execSync(`powershell -Command "Set-ScheduledTask -TaskName 'ObsidianDailyScraper' -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable)"`, { stdio: 'ignore' });
+    console.log('  -> Tarea programada "ObsidianDailyScraper" registrada/actualizada con éxito (con ejecución inmediata si se pierde el horario).');
   } catch (err) {
     console.log('  -> Nota: No se pudo registrar la tarea ObsidianDailyScraper automáticamente.');
   }
@@ -341,7 +342,8 @@ if (os.platform() === 'win32') {
   try {
     const cmdWeekly = `schtasks /create /tn "ObsidianWeeklyAudit" /tr "\\\"${bashPath}\\\" \\\"${auditScript}\\\"" /sc weekly /d FRI /st 18:00 /f`;
     execSync(cmdWeekly, { stdio: 'ignore' });
-    console.log('  -> Tarea programada "ObsidianWeeklyAudit" registrada/actualizada con éxito.');
+    execSync(`powershell -Command "Set-ScheduledTask -TaskName 'ObsidianWeeklyAudit' -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable)"`, { stdio: 'ignore' });
+    console.log('  -> Tarea programada "ObsidianWeeklyAudit" registrada/actualizada con éxito (con ejecución inmediata si se pierde el horario).');
   } catch (err) {
     console.log('  -> Nota: No se pudo registrar la tarea ObsidianWeeklyAudit automáticamente.');
   }
