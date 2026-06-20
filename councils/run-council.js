@@ -1,6 +1,66 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const { execSync } = require('child_process');
+
+// ─── Sistema Obsidian: mapa de skills por rol de agente ───────────────────────
+// Cada agente hereda los learnings.md de sus skills de dominio en cada debate.
+const AGENT_SKILLS = {
+  architect:             ['security-hardening', 'test-driven-development', 'accessibility-a11y', 'api-conventions', 'zero-downtime-databases'],
+  cfo:                   ['performance-optimization', 'edge-runtime-serverless'],
+  orchestrator:          ['api-conventions', 'ci-cd-pipelines', 'edge-runtime-serverless', 'monorepo-pnpm-turborepo', 'git-workflow'],
+  niche_researcher:      ['agentic-tool-use', 'vector-search-rag', 'obsidian-forge', 'obsidian-pulse'],
+  comparative_researcher:['performance-optimization', 'agentic-tool-use', 'vector-search-rag', 'micro-frontends'],
+};
+
+const SKILLS_BASE = path.join(os.homedir(), '.claude', 'skills');
+
+// Ruta al binario de Engram (misma lógica que setup.js)
+const ENGRAM_BIN = (() => {
+  const candidate = path.join(os.homedir(), '.gemini', 'antigravity', 'bin', 'engram.exe');
+  return fs.existsSync(candidate) ? candidate : 'engram';
+})();
+
+/**
+ * Lee los learnings.md de las skills asignadas al agente.
+ * Devuelve bloque markdown con los deltas de cada skill que tenga contenido.
+ */
+function loadAgentSkillLearnings(agentName) {
+  const skills = AGENT_SKILLS[agentName] || [];
+  const blocks = [];
+  for (const skill of skills) {
+    try {
+      const content = fs.readFileSync(path.join(SKILLS_BASE, skill, 'learnings.md'), 'utf8').trim();
+      if (content) blocks.push(`#### Skill: ${skill}\n${content}`);
+    } catch (_) { /* skill no instalada localmente, se omite */ }
+  }
+  return blocks.length > 0
+    ? blocks.join('\n\n')
+    : '(Sin deltas de aprendizaje en las skills asignadas todavia — los learnings se acumulan con el uso)';
+}
+
+/**
+ * Consulta Engram por memorias relevantes al dominio del agente.
+ * Timeout de 4s, silencioso si Engram no responde.
+ */
+function loadAgentEngramMemories(agentName) {
+  const queries = {
+    architect:             'security architecture SOLID patterns code quality',
+    cfo:                   'performance optimization token cost efficiency budget',
+    orchestrator:          'automation hooks scripts workflow integration',
+    niche_researcher:      'MCP servers skills AI tools repositories trending',
+    comparative_researcher:'comparison integration frameworks tools evaluation',
+  };
+  try {
+    const out = execSync(
+      `"${ENGRAM_BIN}" search "${queries[agentName] || agentName}" --limit 5`,
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 4000 }
+    ).trim();
+    return out || '(Sin memorias en Engram para este agente todavia)';
+  } catch (_) {
+    return '(Engram no disponible o sin resultados — se activa tras las primeras sesiones de codigo)';
+  }
+}
 
 const topic = process.argv.slice(2).join(' ') || 'Analizar estado actual y planificar siguientes pasos';
 
@@ -63,18 +123,27 @@ if (fs.existsSync(LOGS_BECARIO)) {
   internLogsContext = '(Carpeta logs_becario/ aún no creada — el becario no ha corrido ninguna tarea)';
 }
 
-// 2. Leer perfiles, notas e investigaciones de agentes
+// 2. Leer perfiles, notas, research + inyección Obsidian completa por agente
 const agentsList = ['architect', 'cfo', 'orchestrator', 'niche_researcher', 'comparative_researcher'];
 let agentsDataPrompt = '';
 
+console.log('\nCargando contexto Obsidian por agente...');
 for (const agent of agentsList) {
-  const agentFile = path.join(AGENTS_DIR, `${agent}.md`);
-  const notesFile = path.join(NOTES_DIR, `${agent}_notes.md`);
+  const agentFile    = path.join(AGENTS_DIR, `${agent}.md`);
+  const notesFile    = path.join(NOTES_DIR, `${agent}_notes.md`);
   const researchFile = path.join(RESEARCH_DIR, `${agent}_research.md`);
 
-  const personality = fs.existsSync(agentFile) ? fs.readFileSync(agentFile, 'utf8') : `(Sin archivo de personalidad para ${agent})`;
-  const notes = fs.existsSync(notesFile) ? fs.readFileSync(notesFile, 'utf8') : `(Sin notas actuales para ${agent})`;
-  const research = fs.existsSync(researchFile) ? fs.readFileSync(researchFile, 'utf8') : `(Sin investigaciones recientes para ${agent})`;
+  const personality = fs.existsSync(agentFile)    ? fs.readFileSync(agentFile, 'utf8')    : `(Sin archivo de personalidad para ${agent})`;
+  const notes       = fs.existsSync(notesFile)    ? fs.readFileSync(notesFile, 'utf8')    : `(Sin notas actuales para ${agent})`;
+  const research    = fs.existsSync(researchFile) ? fs.readFileSync(researchFile, 'utf8') : `(Sin investigaciones recientes para ${agent})`;
+
+  // ─── Obsidian: learnings.md de las skills de dominio del agente ──────────
+  const skillLearnings = loadAgentSkillLearnings(agent);
+
+  // ─── Obsidian: memorias personales del agente en Engram ──────────────────
+  process.stdout.write(`  [Obsidian] ${agent}... `);
+  const engramMemories = loadAgentEngramMemories(agent);
+  console.log('OK');
 
   agentsDataPrompt += `
 ========================================
@@ -88,6 +157,13 @@ ${notes}
 
 ### Últimas Investigaciones y Fuentes de Internet (Scraped):
 ${research}
+
+### Deltas de Aprendizaje de Skills Obsidian (learnings.md por skill de dominio):
+Skills asignadas: ${(AGENT_SKILLS[agent] || []).join(', ')}
+${skillLearnings}
+
+### Memorias Personales del Agente en Engram (top-5 más relevantes por dominio):
+${engramMemories}
 \n`;
 }
 
