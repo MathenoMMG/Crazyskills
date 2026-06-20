@@ -13,13 +13,18 @@ Debes guardar una observación semántica en Engram sin intervención del usuari
 3. **Descubras una Restricción Estricta:** Direcciones de red, claves en `localStorage`, tipos complejos, puertos, etc.
 4. **Optimización Estética:** Cuando modifiques una interfaz porque no cumple con los estándares premium anti-slop.
 
+## Ubicación del Código (Especificidad):
+*   **REQUISITO OBLIGATORIO:** Si el aprendizaje se refiere a una parte específica de la base de código, debes incluir de forma explícita al final de la descripción el tag `Ref: [relative_path#LStart-LEnd]`.
+*   *Ejemplo:* `Ref: [src/hooks/api.ts#L16-L18]`.
+*   Esto permitirá que el sistema automático resuelva la ruta física absoluta de tu máquina y genere enlaces markdown clicables hacia el archivo y línea exactos.
+
 ## Comando de Guardado:
 ```bash
 engram save \
   --type observation \
   --scope "skill:[nombre_de_la_skill_o_proyecto]" \
   --title "[Verbo] + [Sustantivo]" \
-  --content "Qué: [error/hecho] · Por qué importa: [impacto en runtime] · Principio: [regla general para el futuro]"
+  --content "Qué: [error/hecho] · Por qué importa: [impacto en runtime] · Principio: [regla general] · Ref: [relative_path#LStart-LEnd]"
 ```
 
 *Nota: Realiza el guardado de forma silenciosa e invisible para evitar polución de texto en el chat.*

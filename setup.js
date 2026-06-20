@@ -33,7 +33,6 @@ for (const s of scripts) {
   const srcPath = path.join(CURRENT_DIR, s);
   if (fs.existsSync(srcPath)) {
     let content = fs.readFileSync(srcPath, 'utf8');
-    // Hacer portable el reporte
     content = content.replace(/C:\\\\Users\\\\matyo/g, USER_HOME.replace(/\\/g, '\\\\'));
     content = content.replace(/C:\/Users\/matyo/g, USER_HOME.replace(/\\/g, '/'));
     fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', s), content, 'utf8');
@@ -50,14 +49,8 @@ if echo "$command" | grep -qE 'rm -rf|sudo|git push.*-f|git push.*--force'; then
 fi`;
 fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', 'block-dangerous.sh'), blockDangerousContent, 'utf8');
 
-// Crear auto-forge.js portable
-const autoForgePath = path.join(CURRENT_DIR, 'auto-forge.js');
-let autoForgeContent = '';
-if (fs.existsSync(autoForgePath)) {
-  autoForgeContent = fs.readFileSync(autoForgePath, 'utf8');
-} else {
-  // Re-crear código si no está en el repo
-  autoForgeContent = `const fs = require('fs');
+// Crear auto-forge.js portable (soporta global, local y referencias de línea clicables)
+const autoForgeContent = `const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
@@ -66,27 +59,77 @@ const CLAUDE_DIR = path.join(USERPROFILE, '.claude');
 const TEMP_EXPORT = path.join(CLAUDE_DIR, 'hooks', 'temp_export.json');
 
 try {
+  console.log('Running automatic forge...');
   execSync(\`engram export "\${TEMP_EXPORT}"\`, { stdio: 'ignore' });
   if (!fs.existsSync(TEMP_EXPORT)) return;
+  
   const data = JSON.parse(fs.readFileSync(TEMP_EXPORT, 'utf8'));
   try { fs.unlinkSync(TEMP_EXPORT); } catch (e) {}
+  
   if (!data.observations || data.observations.length === 0) return;
+  
+  const sessionDirs = {};
+  if (data.sessions) {
+    for (const sess of data.sessions) {
+      if (sess.id && sess.directory) {
+        sessionDirs[sess.id] = sess.directory;
+      }
+    }
+  }
+  
   const skillObs = data.observations.filter(obs => obs.scope && obs.scope.startsWith('skill:'));
-  if (skillObs.length === 0) return;
-
+  
   for (const obs of skillObs) {
     const skillName = obs.scope.substring('skill:'.length).trim();
     if (!skillName) continue;
-    const skillDir = path.join(CLAUDE_DIR, 'skills', skillName);
-    const learningsPath = path.join(skillDir, 'learnings.md');
-    if (!fs.existsSync(skillDir)) fs.mkdirSync(skillDir, { recursive: true });
+    
+    const globalLearningsPath = path.join(CLAUDE_DIR, 'skills', skillName, 'learnings.md');
+    const projectDir = sessionDirs[obs.session_id];
+    let localLearningsPath = null;
+    if (projectDir && fs.existsSync(projectDir)) {
+      localLearningsPath = path.join(projectDir, 'learnings.md');
+    }
+    
+    let content = obs.content;
+    let refLink = '';
+    const refRegex = /Ref:\\s*\\[([^#\\]]+)(?:#L?(\\d+)(?:-L?(\\d+))?)?\\]/i;
+    const match = content.match(refRegex);
+    if (match) {
+      const relPath = match[1].trim();
+      const startLine = match[2];
+      const endLine = match[3] || startLine;
+      const fileBasename = path.basename(relPath);
+      
+      if (projectDir) {
+        const absoluteFilePath = path.join(projectDir, relPath).replace(/\\\\/g, '/');
+        const lineAnchor = startLine ? \`#L\${startLine}\${endLine ? \`-L\${endLine}\` : ''}\` : '';
+        const lineLabel = startLine ? \`:L\${startLine}\${endLine && endLine !== startLine ? \`-\${endLine}\` : ''}\` : '';
+        refLink = \` (Ref: [\${fileBasename}\${lineLabel}](file:///\${absoluteFilePath}\${lineAnchor}))\`;
+      } else {
+        refLink = \` (Ref: \\\`\${relPath}\${startLine ? \`:\${startLine}\` : ''}\\\`)\`;
+      }
+      content = content.replace(refRegex, '').trim();
+    }
+    
     const dateStr = obs.created_at.substring(0, 10);
-    const newEntry = \`- [\${dateStr}] \${obs.title} -> \${obs.content}\\n\`;
-    fs.appendFileSync(learningsPath, newEntry, 'utf8');
-    try { execSync(\`engram delete \${obs.id}\`, { stdio: 'ignore' }); } catch (err) {}
+    const formattedContent = content.replace(/\\r?\\n/g, ' ');
+    const entry = \`- [\${dateStr}] \${obs.title} -> \${formattedContent}\${refLink}\\n\`;
+    
+    // Escribir a global
+    const globalSkillDir = path.join(CLAUDE_DIR, 'skills', skillName);
+    if (!fs.existsSync(globalSkillDir)) fs.mkdirSync(globalSkillDir, { recursive: true });
+    fs.appendFileSync(globalLearningsPath, entry, 'utf8');
+    
+    // Escribir a local
+    if (localLearningsPath) {
+      fs.appendFileSync(localLearningsPath, entry, 'utf8');
+    }
+    
+    try {
+      execSync(\`engram delete \${obs.id}\`, { stdio: 'ignore' });
+    } catch (err) {}
   }
 } catch (err) {}`;
-}
 fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', 'auto-forge.js'), autoForgeContent, 'utf8');
 
 // 3. Crear slash commands
@@ -108,12 +151,10 @@ if (fs.existsSync(skillsSourceDir)) {
     const destSkillDir = path.join(CLAUDE_DIR, 'skills', s);
     if (!fs.existsSync(destSkillDir)) fs.mkdirSync(destSkillDir, { recursive: true });
     
-    // Copiar SKILL.md
     const skillMdSrc = path.join(skillsSourceDir, s, 'SKILL.md');
     if (fs.existsSync(skillMdSrc)) {
       fs.copyFileSync(skillMdSrc, path.join(destSkillDir, 'SKILL.md'));
     }
-    // Crear learnings.md vacío
     fs.writeFileSync(path.join(destSkillDir, 'learnings.md'), '', 'utf8');
   }
 }
@@ -137,13 +178,12 @@ if (os.platform() === 'win32') {
       execSync(`New-Item -ItemType Junction -Path "${geminiSkillsPath}" -Target "${path.join(CLAUDE_DIR, 'skills')}"`, { shell: 'powershell.exe' });
       console.log('Junction Link de skills creado con éxito.');
     } catch (e) {
-      console.log('Nota: No se pudo crear el Junction automáticamente (tal vez ya existe o requiere permisos).');
+      console.log('Nota: No se pudo crear el Junction automáticamente.');
     }
   }
 }
 
 // 7. Configurar settings.json y fusionar en .claude.json
-// Buscar ruta de engram.exe
 let engramPath = 'engram';
 if (os.platform() === 'win32') {
   const possibleEngramPath = path.join(USER_HOME, '.gemini', 'antigravity', 'bin', 'engram.exe');
@@ -227,4 +267,3 @@ if (fs.existsSync(CLAUDE_JSON_PATH)) {
 }
 
 console.log('--- INSTALACIÓN Y CONFIGURACIÓN COMPLETADA CON ÉXITO ---');
-console.log('El Sistema Obsidian ya está activo en tu máquina.');
