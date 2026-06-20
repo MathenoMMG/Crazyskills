@@ -45,6 +45,7 @@ El sistema está desplegado en la raíz global de Claude (`%USERPROFILE%\.claude
 - [x] Scraper diario libre de tokens configurado con Google News RSS y Dev.to/Reddit.
 - [x] Parser automático de persistencia de opiniones y memorias en `run-council.js`.
 - [x] Configuración de tareas programadas de Windows integradas en `setup.js`.
+- [x] Configuración de `.gitignore` para ignorar notas, investigaciones, debates e historiales locales por privacidad de proyectos.
 
 ## Qué hace falta
 - [x] Ejecutar el primer debate del consejo usando el script `run-council.js` o mediante Antigravity para validar su funcionamiento completo y la persistencia de datos.
