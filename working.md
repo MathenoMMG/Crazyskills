@@ -18,10 +18,13 @@ El sistema está desplegado en la raíz global de Claude (`%USERPROFILE%\.claude
 - **`comparativa_rendimiento.md`**:
   - Bitácora global e independiente de herramientas, guardada directamente en tu carpeta de usuario `%USERPROFILE%\comparativa_rendimiento.md` para auditar el impacto en todos los proyectos de tu PC.
 - **`councils/`**:
-  - `agents/`: Perfiles markdown de los 5 agentes (Architect, CFO, Orchestrator, Niche Researcher, Comparative Researcher).
+  - `agents/`: Perfiles markdown de personalidad y aprendizajes acumulativos (`[agente].md`).
+  - `notes/`: Notas y opiniones de los agentes sobre la situación actual (`[agente]_notes.md`).
+  - `research/`: Datos y fuentes recolectadas sin tokens por el scraper diario (`[agente]_research.md`).
+  - `debates/`: Transcripciones históricas de debates del consejo (`debate_[timestamp].md`).
+  - `run-council.js`: Script de orquestación y parser automático para actualizar notas y memorias.
+  - `scrape.js`: Scraper diario autónomo de Google News RSS y Dev.to.
   - `investigaciones.md`: Bitácora comparativa y propuestas de integración.
-  - `run-council.js`: Script automatizado para ejecutar debates locales.
-  - `debates/`: Transcripciones históricas de debates del consejo.
 
 ## Qué hay
 - [x] Configuración de directrices globales y hooks de sistema en `settings.json` y `.claude.json`.
@@ -38,11 +41,15 @@ El sistema está desplegado en la raíz global de Claude (`%USERPROFILE%\.claude
 - [x] Creación del sistema de deliberación **Councils** con los perfiles de los 5 agentes en `councils/agents/`.
 - [x] Implementación del script de ejecución `councils/run-council.js` que invoca dinámicamente al agente local para el debate.
 - [x] Creación del archivo inicial de comparación de competencia `councils/investigaciones.md`.
+- [x] Estructuración de 3 archivos por agente (Personalidad/Memoria, Notas, Research).
+- [x] Scraper diario libre de tokens configurado con Google News RSS y Dev.to/Reddit.
+- [x] Parser automático de persistencia de opiniones y memorias en `run-council.js`.
+- [x] Configuración de tareas programadas de Windows integradas en `setup.js`.
 
 ## Qué hace falta
+- [ ] Ejecutar el primer debate del consejo usando el script `run-council.js` o mediante Antigravity para validar su funcionamiento completo y la persistencia de datos.
 - [ ] Monitorización de los primeros ciclos automáticos de `auto-forge.js` tras capturas reales de observaciones para verificar la resolución correcta en Engram.
 - [ ] Rellenar la comparativa cuantitativa y cualitativa de rendimiento dentro de una semana (2026-06-27).
-- [ ] Ejecutar el primer debate del consejo usando el script `run-council.js` para validar su funcionamiento completo en consola.
 
 ## Qué está fallando
-- Ningún fallo detectado. Los scripts han sido probados y responden correctamente en el entorno de Git Bash de Windows.
+- Ningún fallo detectado. Los scrapers y el script del council han sido probados con éxito.

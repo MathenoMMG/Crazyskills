@@ -287,4 +287,64 @@ if (fs.existsSync(CLAUDE_JSON_PATH)) {
   fs.writeFileSync(CLAUDE_JSON_PATH, JSON.stringify(settingsObj, null, 2), 'utf8');
 }
 
+// 8. Inicializar carpetas de Councils si no existen
+const localCouncilsPath = path.join(CURRENT_DIR, 'councils');
+if (fs.existsSync(localCouncilsPath)) {
+  console.log('Inicializando carpetas de notas y research locales...');
+  const localNotesDir = path.join(localCouncilsPath, 'notes');
+  const localResearchDir = path.join(localCouncilsPath, 'research');
+  if (!fs.existsSync(localNotesDir)) fs.mkdirSync(localNotesDir, { recursive: true });
+  if (!fs.existsSync(localResearchDir)) fs.mkdirSync(localResearchDir, { recursive: true });
+  
+  const agents = ['architect', 'cfo', 'orchestrator', 'niche_researcher', 'comparative_researcher'];
+  for (const a of agents) {
+    const nFile = path.join(localNotesDir, `${a}_notes.md`);
+    const rFile = path.join(localResearchDir, `${a}_research.md`);
+    if (!fs.existsSync(nFile)) {
+      fs.writeFileSync(nFile, `# Opiniones y Notas sobre la Situación Actual — ${a.toUpperCase()}\n\n*[Escribe aquí tus conclusiones y opiniones]*\n`, 'utf8');
+    }
+    if (!fs.existsSync(rFile)) {
+      fs.writeFileSync(rFile, `# Datos y Fuentes de Investigación (Scraped) — ${a.toUpperCase()}\n\nÚltima actualización: Nunca\n\n## Fuentes Recientes\n*(Sin datos cargados. Corre el script de scrapeo para actualizar)*\n`, 'utf8');
+    }
+  }
+}
+
+// 9. Configurar Tareas Programadas en Windows si aplica
+if (os.platform() === 'win32') {
+  console.log('Configurando Tareas Programadas en Windows...');
+  
+  const nodeExe = process.execPath;
+  const scrapeScript = path.join(CURRENT_DIR, 'councils', 'scrape.js');
+  
+  try {
+    const cmdDaily = `schtasks /create /tn "ObsidianDailyScraper" /tr "\\\"${nodeExe}\\\" \\\"${scrapeScript}\\\"" /sc daily /st 09:00 /f`;
+    execSync(cmdDaily, { stdio: 'ignore' });
+    console.log('  -> Tarea programada "ObsidianDailyScraper" registrada/actualizada con éxito.');
+  } catch (err) {
+    console.log('  -> Nota: No se pudo registrar la tarea ObsidianDailyScraper automáticamente.');
+  }
+
+  let bashPath = 'bash.exe';
+  const possibleBashPaths = [
+    'C:\\Program Files\\Git\\bin\\bash.exe',
+    'C:\\Program Files\\Git\\git-bash.exe',
+    'C:\\Git\\bin\\bash.exe',
+  ];
+  for (const p of possibleBashPaths) {
+    if (fs.existsSync(p)) {
+      bashPath = p;
+      break;
+    }
+  }
+  
+  const auditScript = path.join(CLAUDE_DIR, 'hooks', 'weekly-audit.sh');
+  try {
+    const cmdWeekly = `schtasks /create /tn "ObsidianWeeklyAudit" /tr "\\\"${bashPath}\\\" \\\"${auditScript}\\\"" /sc weekly /d FRI /st 18:00 /f`;
+    execSync(cmdWeekly, { stdio: 'ignore' });
+    console.log('  -> Tarea programada "ObsidianWeeklyAudit" registrada/actualizada con éxito.');
+  } catch (err) {
+    console.log('  -> Nota: No se pudo registrar la tarea ObsidianWeeklyAudit automáticamente.');
+  }
+}
+
 console.log('--- INSTALACIÓN Y CONFIGURACIÓN COMPLETADA CON ÉXITO ---');

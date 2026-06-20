@@ -18,5 +18,8 @@
 
 ## 💡 Propuestas de Integración Futuras
 
-1.  **Orquestación de Terminales:** Estudiar la adopción de WezTerm/Ghostty en los manuales de usuario para evitar la lentitud de renderizado del stream RAG.
-2.  **Validación de Graphiti:** Investigar la biblioteca de código abierto Graphiti de Zep para evaluar si podemos integrarla como un servidor MCP local para gestionar relaciones de memoria con marcas de tiempo temporales.
+1.  **Delegación a Subagentes de Bajo Costo (Aprobado):** Implementar la definición de subagentes mediante `define_subagent` de Antigravity (utilizando modelos económicos como Gemini 1.5 Flash) para tareas rutinarias y de alto consumo de tokens como la generación de tests unitarios, documentación de APIs o formateo de CSS/HTML, reduciendo el consumo acumulativo en el hilo premium.
+2.  **Orquestación de Terminales:** Estudiar la adopción de WezTerm/Ghostty en los manuales de usuario para evitar la lentitud de renderizado del stream RAG.
+3.  **Evaluación de MemPalace:** Estudiar la arquitectura de `MemPalace` (recuperada en las búsquedas de Niche Researcher) para ver si podemos emular su estrategia de indexación temporal de corto plazo dentro de nuestras skills de markdown sin incurrir en dependencias de bases de datos.
+4.  **Validación de Graphiti:** Investigar la biblioteca de código abierto Graphiti de Zep para evaluar si podemos integrarla como un servidor MCP local para gestionar relaciones de memoria con marcas de tiempo temporales.
+

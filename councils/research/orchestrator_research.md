@@ -1,0 +1,11 @@
+# Datos y Fuentes de Investigación (Scraped) — ORCHESTRATOR
+
+Última actualización: 2026-06-20 20:18:27
+
+## Fuentes Recientes
+
+- **[Google News MCP & DevOps]** [Model Context Protocol (MCP): el nuevo estándar abierto de IA - Plain Concepts](https://news.google.com/rss/articles/CBMibkFVX3lxTE5BY2Rab2JkZWV1WEZhLXluVkhkcldzSHVBWG1ET0dnTFM1M3J6bkZnWndOZkpGbERlbEstX1JiTmoxdzJVaHdOTVdhYUFFMUhtU2FWSVNlVk02Qk03UUJuclFGbWhNLW1TZEVmeGN3?oc=5) (Tue, 02 Dec 2025)
+- **[Google News MCP & DevOps]** [IBM® Safer Payments presenta sistemas de detección de fraudes basados en IA agéntica - IBM](https://news.google.com/rss/articles/CBMirgFBVV95cUxPcEZ0dHRqS0V1aVBwU1F0emdVeWFiSE40eGtydDkzdUt5V09teFBzdkJDUmlqbktqTWpMWDZ3VnFoTTNaclMzcTduanFHT1ZrZ1dVV1JDNV9jZXNFbGk4aFZKVmQ1bFRaTXZXV3JscHpjc1pxY3Rzc05KNURsVy1LcVlQYVNZQS1FVDNmQVVQX2tYamxGNzhKdXhEVHN1TlVPVGFjdWlyQk15R05OZmc?oc=5) (Thu, 05 Mar 2026)
+- **[Google News MCP & DevOps]** [MCP Server y tokens: la alternativa CLI para agentes IA - Ecosistema Startup](https://news.google.com/rss/articles/CBMijgFBVV95cUxQcHRUdVptdEpDRmUyODZfdExJZDVaOTFHVWFOM2ltMy0tUWVxRXI0dTNkeHlIR2xUcXo1bEYwLTYtWnNMWm5YY3hzbFBtWDZ1bmdKYXYtYmh1a3MzNHNsa2dpa0pnSnBKcjhaOFFvcG5naEFrY2lrUkY2QUpvaGczN001M2V0WGJQdUhOQmRR?oc=5) (Mon, 16 Mar 2026)
+- **[Google News MCP & DevOps]** [MCP y el contrato de futuro de la web: hacia una internet donde los agentes de inteligencia artificial actúan en tu nombre - Enrique Dans](https://news.google.com/rss/articles/CBMi9AFBVV95cUxQSktLeFJsdnFYUjQ2SWVSUXBQUFFVNlBUdnI1cEZtMHE3MVYzcUdTdnZEM0ViRlNyYWUtZUdlbVo1dzlab3VLMHFjdUx2OTh0X01TT1gxdDdhWjBIeVRPMXg2S3pncDhybGJrcWxJTUtHTklac18wamJQcGNwQ19WblJrYl85NDN1ZDIwLVFLNmREbmZOVWxOYTdNdjZzRG45YVpldTlPY0NFNWxFUzRZZWJERDc2bnJaTC0xcURSTmxyWU9mWmc3c3ZGVk1JeTI3QktiZXZjaGRrQzNFakhkbHlWdDY2bkVnT09jalVsQ0gxb0U0?oc=5) (Sat, 13 Dec 2025)
+- **[Google News MCP & DevOps]** [Cómo armar el rompecabezas de los agentes: MCP, autenticación y autorización, y nivel gratuito de Durable Objects - The Cloudflare Blog](https://news.google.com/rss/articles/CBMimgFBVV95cUxOQ3dhaGg2dnVBLU5Ia0I5VWxnZDVlQmJMR2xhYzM4TlpNSVVqbE9mOWRpQjR4VlhtWjM4dFVoVGFBUVNuT3BaMXpuRXRUQncxbG5Cci1WMktFNjJ3RUQ5Y3RHbEJIbHhaNEdvcmlfaWVfMlZWUmN5Q2I3eUJaWDRtUFpIVG53MlMzRXRmQWpXbW9rdUt2SVotTTBB?oc=5) (Mon, 07 Apr 2025)
