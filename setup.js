@@ -49,7 +49,7 @@ if echo "$command" | grep -qE 'rm -rf|sudo|git push.*-f|git push.*--force'; then
 fi`;
 fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', 'block-dangerous.sh'), blockDangerousContent, 'utf8');
 
-// Crear auto-forge.js portable (soporta global, local y referencias de línea clicables)
+// Crear auto-forge.js portable
 const autoForgeContent = `const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -160,10 +160,23 @@ if (fs.existsSync(skillsSourceDir)) {
 }
 
 // 5. Crear principles.md global
-const principlesContent = `# Principios Globales Transversales — Sistema Obsidian
-- Lean Content: Cada regla o skill debe contener exclusivamente instrucciones deterministas que afecten el comportamiento del agente en runtime.
-- Pre-Flight Principle: Toda tarea compleja de entrega debe realizar una relectura interna obligatoria de las instrucciones del proyecto.
-- Anti-Embedding: Prohibido hacer que una skill cargue dinámicamente a otra.`;
+const principlesContent = `# Principios Globales Transversales — Ecosistema Obsidian
+
+## 1. Lean Content (Contenido Esbelto)
+Cada regla o skill debe contener exclusivamente instrucciones deterministas que afecten el comportamiento del agente en runtime. Changelogs, créditos y notas de versión van fuera de la memoria activa para ahorrar tokens de contexto.
+
+## 2. Pre-Flight Principle (Relectura de Seguridad)
+Toda tarea compleja de entrega debe realizar una relectura interna obligatoria de las instrucciones del proyecto antes de dar por finalizado el comando para asegurar cero alucinaciones de parámetros y firmas.
+
+## 3. Anti-Embedding (Aislamiento de Carga)
+Prohibido hacer que una skill cargue dinámicamente a otra. Deben invocarse de forma explícita e independiente desde CLAUDE.md o mediante los comandos asignados.
+
+## 4. Markdown GraphRAG (Grafo Semántico de Código)
+Para evitar lecturas masivas y búsquedas probabilísticas, la memoria del proyecto se estructura como un Grafo de Conocimiento conectado mediante enlaces físicos y nodos de entidad:
+- **Mapas de Contenido (MOC):** El archivo \`working.md\` actúa como el nodo raíz del grafo. Debe conectar componentes complejos (ej. \`[[Mailer]]\`, \`[[Payments]]\`) con sus respectivos archivos y líneas físicas.
+- **Formato de Enlace:** Toda referencia a un módulo del sistema debe declararse con su ruta física absoluta e hipervínculo clicable, por ejemplo: \`[NombreModulo](file:///ruta/al/archivo.ts#LStart-LEnd)\`.
+- **Navegación Multi-Hop:** Antes de modificar un componente secundario, el agente debe seguir las conexiones del grafo indicadas en el \`working.md\` o en los \`learnings.md\` para entender las dependencias del archivo destino (ej. qué dependencias tiene \`Mailer\` con \`Users\`).
+- **Cero Suposiciones (Zero Guessing):** Prohibido asumir importaciones o APIs. Si no se conoce la firma de un método enlazado, se debe saltar inmediatamente al enlace físico de la firma en la sesión activa.`;
 fs.writeFileSync(path.join(CLAUDE_DIR, 'principles.md'), principlesContent, 'utf8');
 
 // 6. Crear Junction Link para Antigravity si es Windows
