@@ -176,7 +176,15 @@ Para evitar lecturas masivas y búsquedas probabilísticas, la memoria del proye
 - **Mapas de Contenido (MOC):** El archivo \`working.md\` actúa como el nodo raíz del grafo. Debe conectar componentes complejos (ej. \`[[Mailer]]\`, \`[[Payments]]\`) con sus respectivos archivos y líneas físicas.
 - **Formato de Enlace:** Toda referencia a un módulo del sistema debe declararse con su ruta física absoluta e hipervínculo clicable, por ejemplo: \`[NombreModulo](file:///ruta/al/archivo.ts#LStart-LEnd)\`.
 - **Navegación Multi-Hop:** Antes de modificar un componente secundario, el agente debe seguir las conexiones del grafo indicadas en el \`working.md\` o en los \`learnings.md\` para entender las dependencias del archivo destino (ej. qué dependencias tiene \`Mailer\` con \`Users\`).
-- **Cero Suposiciones (Zero Guessing):** Prohibido asumir importaciones o APIs. Si no se conoce la firma de un método enlazado, se debe saltar inmediatamente al enlace físico de la firma en la sesión activa.`;
+- **Cero Suposiciones (Zero Guessing):** Prohibido asumir importaciones o APIs. Si no se conoce la firma de un método enlazado, se debe saltar inmediatamente al enlace físico de la firma en la sesión activa.
+
+## 5. Navegación en Grandes Proyectos (Circumstantial Expansion)
+- **Lectura Circunstancial:** La lectura quirúrgica por rango de líneas es el enfoque por defecto. Sin embargo, si la complejidad de la lógica o el acoplamiento del código lo requiere, se debe ampliar la ventana de lectura de forma progresiva.
+- **Protocolo de Búsqueda:** Para explorar el código de manera efectiva:
+  1. Utiliza \`grep_search\` para ubicar las declaraciones y todos los usos (referencias cruzadas) de una clase, función o constante.
+  2. Lee el archivo alrededor de la coincidencia (típicamente desde 20 líneas antes hasta 50 líneas después) para captar el contexto funcional.
+  3. Revisa los tests unitarios del componente; las pruebas son la documentación más veraz y el mejor ejemplo de uso de la API interna.
+- **Ventana de Contexto (Presupuesto de 150K):** Para proyectos grandes, el límite máximo de tolerancia de tokens acumulados en la sesión antes de sugerir un reinicio o \`/compact\` se establece en **150,000 tokens**. Mantén la sesión por debajo de este presupuesto para evitar latencia extrema y degradación de la atención del LLM.`;
 fs.writeFileSync(path.join(CLAUDE_DIR, 'principles.md'), principlesContent, 'utf8');
 
 // 6. Crear Junction Link para Antigravity si es Windows
