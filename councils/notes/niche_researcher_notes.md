@@ -1,5 +1,5 @@
 # Opiniones y Notas sobre la Situación Actual — NICHE_RESEARCHER
 
-*   **Opinión sobre el estado actual:** La cobertura del nuevo scraper es fantástica, aportando datos de Hugging Face, Simon Willison, DeepMind y Hacker News en tiempo real.
-*   **Enfoque de investigación:** El paper *MosaicLeaks* expone el talón de Aquiles de los agentes autónomos: la filtración de datos de usuario. 
-*   **Gotchas del sistema:** Estudiar activamente las implementaciones seguras de MCP propuestas por Anthropic.
+*   **Opinión sobre el estado actual:** La madurez de los modelos locales pequeños como Qwen 2.5 Coder (7B/14B) nos permite tratarlos como recursos gratuitos e ilimitados.
+*   **Enfoque de investigación:** Recomiendo probar e integrar Ollama local de inmediato para el rol de codificación junior.
+*   **Gotchas del sistema:** Monitorear el consumo de VRAM en la GPU del usuario al cargar modelos locales en paralelo a las herramientas RAG.
