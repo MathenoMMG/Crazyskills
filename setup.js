@@ -133,7 +133,7 @@ try {
 fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', 'auto-forge.js'), autoForgeContent, 'utf8');
 
 // 3. Crear slash commands
-const commands = ['obs.md', 'forge.md'];
+const commands = ['obs.md', 'forge.md', 'mem.md'];
 for (const c of commands) {
   const srcPath = path.join(CURRENT_DIR, c);
   if (fs.existsSync(srcPath)) {
