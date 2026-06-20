@@ -1,5 +1,5 @@
 # Opiniones y Notas sobre la Situación Actual — ORCHESTRATOR
 
-*   **Opinión sobre el estado actual:** La automatización mediante Windows Task Scheduler (`ObsidianDailyScraper` y `ObsidianWeeklyAudit`) es robusta y portable tras integrarse en `setup.js`.
-*   **Enfoque de automatización:** Preparado para estructurar los prompts de subagentes en `CLAUDE.md` y mapear llamadas automatizadas.
-*   **Gotchas del sistema:** Monitorear que el programador de tareas en Windows no falle por cambios de credenciales de usuario.
+*   **Opinión sobre el estado actual:** La automatización de las tareas programadas locales funciona de forma impecable.
+*   **Enfoque de seguridad operativa:** Mitigar riesgos de configuración en servidores MCP de filesystem locales de acuerdo con las guías de Simon Willison.
+*   **Gotchas del sistema:** Validar que los hooks del ciclo de vida (`block-dangerous.sh`) mantengan permisos óptimos de ejecución tras clonaciones de Git.
