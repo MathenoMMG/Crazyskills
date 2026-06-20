@@ -4,11 +4,14 @@ const { execSync } = require('child_process');
 
 const topic = process.argv.slice(2).join(' ') || 'Analizar estado actual y planificar siguientes pasos';
 
-const AGENTS_DIR = path.join(__dirname, 'agents');
-const NOTES_DIR = path.join(__dirname, 'notes');
+const AGENTS_DIR   = path.join(__dirname, 'agents');
+const NOTES_DIR    = path.join(__dirname, 'notes');
 const RESEARCH_DIR = path.join(__dirname, 'research');
-const DEBATES_DIR = path.join(__dirname, 'debates');
-const WORKING_MD_PATH = path.join(__dirname, '..', 'working.md');
+const DEBATES_DIR  = path.join(__dirname, 'debates');
+const LOGS_BECARIO = path.join(__dirname, 'logs_becario');
+const WORKING_MD_PATH   = path.join(__dirname, '..', 'working.md');
+const PRINCIPLES_PATH   = path.join(require('os').homedir(), '.claude', 'principles.md');
+const LEARNINGS_PATH    = path.join(__dirname, '..', 'learnings.md');
 
 console.log(`=== INICIANDO DEBATE DEL CONSEJO CONSULTIVO ===`);
 console.log(`Tema: "${topic}"\n`);
@@ -19,6 +22,45 @@ if (fs.existsSync(WORKING_MD_PATH)) {
   workingContext = fs.readFileSync(WORKING_MD_PATH, 'utf8');
 } else {
   workingContext = 'No se encontró working.md en la raíz.';
+}
+
+// 1b. Leer principios globales del sistema
+let principlesContext = '';
+if (fs.existsSync(PRINCIPLES_PATH)) {
+  principlesContext = fs.readFileSync(PRINCIPLES_PATH, 'utf8');
+  console.log('Principios globales cargados desde principles.md');
+} else {
+  principlesContext = '(Sin principles.md global encontrado)';
+}
+
+// 1c. Leer learnings.md del proyecto si existe
+let learningsContext = '';
+if (fs.existsSync(LEARNINGS_PATH)) {
+  learningsContext = fs.readFileSync(LEARNINGS_PATH, 'utf8');
+  console.log('Aprendizajes del proyecto cargados desde learnings.md');
+} else {
+  learningsContext = '(Sin learnings.md local encontrado en la raíz del proyecto)';
+}
+
+// 1d. Leer últimos 5 logs del becario para auditoría del Architect y Orchestrator
+let internLogsContext = '';
+if (fs.existsSync(LOGS_BECARIO)) {
+  const logFiles = fs.readdirSync(LOGS_BECARIO)
+    .filter(f => f.startsWith('log_') && f.endsWith('.md'))
+    .sort()
+    .slice(-5);
+
+  if (logFiles.length > 0) {
+    internLogsContext = logFiles.map(f => {
+      const content = fs.readFileSync(path.join(LOGS_BECARIO, f), 'utf8');
+      return `### ${f}\n${content.substring(0, 600)}${content.length > 600 ? '\n...(truncado)' : ''}`;
+    }).join('\n\n---\n\n');
+    console.log(`Últimos ${logFiles.length} log(s) del becario cargados para auditoría.`);
+  } else {
+    internLogsContext = '(Sin logs del becario disponibles todavía)';
+  }
+} else {
+  internLogsContext = '(Carpeta logs_becario/ aún no creada — el becario no ha corrido ninguna tarea)';
 }
 
 // 2. Leer perfiles, notas e investigaciones de agentes
@@ -58,7 +100,19 @@ ESTADO ACTUAL DEL PROYECTO (working.md):
 ${workingContext}
 ---
 
-INFORMACIÓN Y PERSONALIDADES DE LOS AGENTES DEL CONSEJO:
+PRINCIPIOS GLOBALES DEL SISTEMA (principles.md):
+${principlesContext}
+---
+
+APRENDIZAJES DEL PROYECTO (learnings.md — deltas acumulados):
+${learningsContext}
+---
+
+AUDITORÍA DE LOGS DEL BECARIO (Ollama — últimos 5 logs | ARCHITECT y ORCHESTRATOR: revisar alertas de seguridad [⚠️ SECURITY_WARN]):
+${internLogsContext}
+---
+
+INFORMACION Y PERSONALIDADES DE LOS AGENTES DEL CONSEJO:
 ${agentsDataPrompt}
 
 Estructura del Output esperado:

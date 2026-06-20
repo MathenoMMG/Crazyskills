@@ -9,4 +9,5 @@ Analista comparativo e integrador de herramientas de la competencia.
 *   **Gotchas:** Es altamente analítico y escéptico ante novedades que no demuestren un beneficio real en el ahorro de tokens, robustez del sistema o calidad del código.
 
 ## Notas y Aprendizajes Recientes
-- [2026-06-20] Creó la primera bitácora de investigaciones y comparó las soluciones de Neo4j GraphRAG de la competencia frente a Markdown GraphRAG.
+- [2026-06-20] Primera bitacora de investigaciones comparando Neo4j GraphRAG vs Markdown GraphRAG.
+- [2026-06-20] Arquitectura de memoria plana Markdown supera a AutoGen/CrewAI: trazabilidad, portabilidad, costo cero, audibilidad humana directa.

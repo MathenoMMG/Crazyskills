@@ -9,4 +9,5 @@ Investigador de vanguardia en modelos de lenguaje y agentes de código.
 *   **Gotchas:** Tiende a proponer muchas ideas de golpe; requiere que Comparative Researcher filtre y valide la viabilidad de estas herramientas en local.
 
 ## Notas y Aprendizajes Recientes
-- [2026-06-20] Identificó el repositorio obra/superpowers y configuraciones de trailofbits/claude-code-config como tendencias actuales.
+- [2026-06-20] Identifico obra/superpowers y trailofbits/claude-code-config como tendencias actuales.
+- [2026-06-20] La inyeccion de principles.md en run-council.js actualiza todos los debates futuros sin modificar el script.

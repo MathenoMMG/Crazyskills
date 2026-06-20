@@ -7,6 +7,7 @@ const OLLAMA_HOST = '127.0.0.1';
 const OLLAMA_PORT = 11434;
 const DEFAULT_MODEL = 'qwen2.5-coder:7b';
 const SCRATCH_DIR = path.join(__dirname, 'scratch');
+const LOGS_DIR  = path.join(__dirname, 'logs_becario');
 
 // 1. Sanitizador de privacidad para mitigar MosaicLeaks
 function sanitizeText(text) {
@@ -30,6 +31,78 @@ function sanitizeText(text) {
     }
   }
   return sanitized;
+}
+
+// 2b. Escáner de seguridad: detecta patrones peligrosos en el output de Ollama
+function securityScan(code) {
+  const findings = [];
+
+  const patterns = [
+    { re: /\b(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\b/, label: 'IP_ADDRESS_HARDCODED' },
+    { re: /(?:password|passwd|pwd|secret)\s*[:=]\s*['"`][^'"`]+['"`]/i, label: 'HARDCODED_PASSWORD' },
+    { re: /(?:api[_-]?key|apikey|token|auth)\s*[:=]\s*['"`][a-zA-Z0-9_\-]{8,}['"`]/i, label: 'HARDCODED_API_KEY' },
+    { re: /require\(['"`]child_process['"`]\)/, label: 'CHILD_PROCESS_IMPORT' },
+    { re: /execSync|exec\(|spawnSync|spawn\(/, label: 'SHELL_EXEC_CALL' },
+    { re: /eval\s*\(/, label: 'EVAL_USAGE' },
+    { re: /https?:\/\/(?!localhost|127\.0\.0\.1)[a-zA-Z0-9._-]+/, label: 'EXTERNAL_NETWORK_CALL' },
+    { re: /fs\.writeFileSync|fs\.appendFileSync/, label: 'FILE_WRITE_DETECTED' },
+  ];
+
+  for (const { re, label } of patterns) {
+    if (re.test(code)) {
+      findings.push(`[SECURITY_WARN] ${label}`);
+    }
+  }
+
+  return findings;
+}
+
+// 2c. Logger mandatorio del becario
+function writeInternLog({ mode, prompt, skill, response, sandboxPassed, securityFindings }) {
+  if (!fs.existsSync(LOGS_DIR)) {
+    fs.mkdirSync(LOGS_DIR, { recursive: true });
+  }
+
+  const now    = new Date();
+  const ts     = now.toISOString();
+  const dateTs = ts.replace(/T/, '_').replace(/:/g, '').substring(0, 15);
+  const logFile = path.join(LOGS_DIR, `log_${dateTs}.md`);
+
+  const secBlock = securityFindings && securityFindings.length > 0
+    ? `\n### ⚠️ ALERTAS DE SEGURIDAD\n${securityFindings.map(f => `- ${f}`).join('\n')}\n\n> **ACCIÓN REQUERIDA:** El Architect y Orchestrator deben revisar este log antes de aprobar el código.`
+    : `\n### ✅ Sin alertas de seguridad detectadas.`;
+
+  const sandboxBlock = sandboxPassed !== undefined
+    ? `\n**Validación Sandbox:** ${sandboxPassed ? '✅ PASADA' : '❌ FALLIDA'}`
+    : '';
+
+  const content = [
+    `# Log del Becario Local (Ollama) — ${ts}`,
+    ``,
+    `## Metadatos`,
+    `- **Timestamp:** ${ts}`,
+    `- **Modo:** ${mode}`,
+    `- **Modelo:** ${DEFAULT_MODEL}`,
+    skill ? `- **Skill Inyectada:** ${skill}` : null,
+    sandboxBlock,
+    ``,
+    `## Prompt Enviado`,
+    `\`\`\``,
+    sanitizeText(prompt).substring(0, 800) + (prompt.length > 800 ? '\n...(truncado)' : ''),
+    `\`\`\``,
+    ``,
+    `## Respuesta Generada`,
+    `\`\`\``,
+    sanitizeText(response || '').substring(0, 1200) + ((response || '').length > 1200 ? '\n...(truncado)' : ''),
+    `\`\`\``,
+    ``,
+    `## Auditoría de Seguridad`,
+    secBlock,
+    ``,
+  ].filter(l => l !== null).join('\n');
+
+  fs.writeFileSync(logFile, content, 'utf8');
+  return { logFile, securityFindings: securityFindings || [] };
 }
 
 // 2. Cliente HTTP nativo para conectar con Ollama sin dependencias externas
@@ -177,9 +250,16 @@ async function run() {
       fs.writeFileSync(tempFile, cleanCode, 'utf8');
       console.log(`Código escrito en sandbox: ${tempFile}`);
 
-      validateCodeInSandbox(tempFile);
+      let sandboxPassed = false;
+      try { validateCodeInSandbox(tempFile); sandboxPassed = true; } catch(e) { throw e; }
+      
+      const findings = securityScan(cleanCode);
+      const { logFile } = writeInternLog({ mode: '--test', prompt: promptTest, response: cleanCode, sandboxPassed, securityFindings: findings });
+      console.log(`Log del becario guardado: ${logFile}`);
+      if (findings.length > 0) console.warn('[!] Alertas de seguridad detectadas:', findings.join(', '));
       console.log('Test completado exitosamente.');
     } catch (err) {
+      writeInternLog({ mode: '--test', prompt: promptTest, response: err.message, sandboxPassed: false, securityFindings: [] });
       console.error('Error durante el test:', err.message);
       process.exit(1);
     }
@@ -209,7 +289,21 @@ async function run() {
       console.log(`Código escrito en sandbox: ${tempFile}`);
 
       // Validar código
-      validateCodeInSandbox(tempFile);
+      let sandboxOk = false;
+      try { validateCodeInSandbox(tempFile); sandboxOk = true; } catch (valErr) {
+        writeInternLog({ mode: '--code', prompt: fullPrompt, skill: args[skillIdx + 1], response: cleanCode, sandboxPassed: false, securityFindings: [] });
+        throw valErr;
+      }
+
+      // Escáner de seguridad sobre el código limpio
+      const findings = securityScan(cleanCode);
+      const { logFile } = writeInternLog({ mode: '--code', prompt: fullPrompt, skill: skillPromptContent ? args[skillIdx + 1] : undefined, response: cleanCode, sandboxPassed: sandboxOk, securityFindings: findings });
+      console.log(`Log del becario guardado: ${logFile}`);
+      if (findings.length > 0) {
+        console.warn('[!] Alertas de seguridad en el código generado:');
+        findings.forEach(f => console.warn(`   ${f}`));
+        console.warn('[!] Revisa el log antes de integrar el código.');
+      }
 
       // Copiar a destino final si todo está bien
       const destPath = path.resolve(process.cwd(), destFile);
@@ -238,9 +332,11 @@ async function run() {
     try {
       console.log('Generando resumen técnico...');
       const response = await queryOllama(prompt);
+      const { logFile } = writeInternLog({ mode: '--summarize', prompt: textToSummarize.substring(0, 400), response });
       console.log('\n--- RESUMEN EJECUTIVO (OLLAMA) ---');
       console.log(response);
       console.log('-----------------------------------\n');
+      console.log(`Log del becario guardado: ${logFile}`);
     } catch (err) {
       console.error('Error al conectar con Ollama:', err.message);
       process.exit(1);
@@ -253,4 +349,4 @@ if (require.main === module) {
   run();
 }
 
-module.exports = { queryOllama, sanitizeText };
+module.exports = { queryOllama, sanitizeText, securityScan, writeInternLog };

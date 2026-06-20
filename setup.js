@@ -293,8 +293,13 @@ if (fs.existsSync(localCouncilsPath)) {
   console.log('Inicializando carpetas de notas y research locales...');
   const localNotesDir = path.join(localCouncilsPath, 'notes');
   const localResearchDir = path.join(localCouncilsPath, 'research');
+  const localLogsBecario = path.join(localCouncilsPath, 'logs_becario');
   if (!fs.existsSync(localNotesDir)) fs.mkdirSync(localNotesDir, { recursive: true });
   if (!fs.existsSync(localResearchDir)) fs.mkdirSync(localResearchDir, { recursive: true });
+  if (!fs.existsSync(localLogsBecario)) {
+    fs.mkdirSync(localLogsBecario, { recursive: true });
+    console.log('  -> Carpeta councils/logs_becario/ creada (logs del becario local, ignorada por Git).');
+  }
   
   const agents = ['architect', 'cfo', 'orchestrator', 'niche_researcher', 'comparative_researcher'];
   for (const a of agents) {

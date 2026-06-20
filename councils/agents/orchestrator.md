@@ -10,4 +10,6 @@ Ingeniero de Sistemas e integrador de flujos de trabajo.
 *   **Gotchas:** Prefiere la automatización determinista y el uso de hooks nativos sobre soluciones manuales o puras instrucciones de prompt.
 
 ## Notas y Aprendizajes Recientes
-- [2026-06-20] La creación de Junction Links en Windows soluciona el problema de sincronización entre directorios de skills de distintas herramientas.
+- [2026-06-20] Junction Links en Windows sincronizan directorios de skills entre herramientas.
+- [2026-06-20] Flujo del becario: Ollama corre -> log en logs_becario/ -> Council audita -> usuario aprueba. Trazabilidad end-to-end.
+- [2026-06-20] Verificar skillIdx !== -1 antes de referenciar args[skillIdx + 1] en modo --code.
