@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
+const { queryOllama } = require('./ollama-runner');
 
 const RESEARCH_DIR = path.join(__dirname, 'research');
 
@@ -132,6 +133,19 @@ async function run() {
     } else {
       for (const item of entries) {
         fileContent += `- **[${item.source}]** [${item.title}](${item.link}) (${item.date})\n`;
+      }
+      
+      // Intentar generar síntesis con Ollama si está activo (Becario Local)
+      try {
+        const headlines = entries.map(item => `- [${item.source}] ${item.title}`).join('\n');
+        console.log(`  Generando síntesis semántica con Ollama local para ${agent}...`);
+        // Usar un timeout implícito rápido o esperar la resolución
+        const ollamaResponse = await queryOllama(
+          `Analiza la siguiente lista de titulares de noticias y genera un breve informe (2-3 viñetas) en español destacando qué tecnologías, herramientas o conceptos debemos vigilar y por qué son importantes para nuestro sistema local:\n\n${headlines}`
+        );
+        fileContent += `\n### Síntesis de Investigaciones (Ollama):\n${ollamaResponse.trim()}\n`;
+      } catch (err) {
+        console.log(`  (Ollama local inactivo o inaccesible, se omite síntesis para ${agent})`);
       }
     }
     
