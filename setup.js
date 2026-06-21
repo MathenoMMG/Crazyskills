@@ -147,7 +147,7 @@ try {
 fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', 'auto-forge.js'), autoForgeContent, 'utf8');
 
 // 3. Crear slash commands
-const commands = ['obs.md', 'forge.md', 'mem.md', 'rese.md'];
+const commands = ['obs.md', 'forge.md', 'mem.md'];
 for (const c of commands) {
   const srcPath = path.join(CURRENT_DIR, c);
   if (fs.existsSync(srcPath)) {
@@ -312,49 +312,10 @@ if (fs.existsSync(CLAUDE_JSON_PATH)) {
   fs.writeFileSync(CLAUDE_JSON_PATH, JSON.stringify(settingsObj, null, 2), 'utf8');
 }
 
-// 8. Inicializar carpetas de Councils si no existen
-const localCouncilsPath = path.join(CURRENT_DIR, 'councils');
-if (fs.existsSync(localCouncilsPath)) {
-  console.log('Inicializando carpetas de notas y research locales...');
-  const localNotesDir = path.join(localCouncilsPath, 'notes');
-  const localResearchDir = path.join(localCouncilsPath, 'research');
-  const localLogsBecario = path.join(localCouncilsPath, 'logs_becario');
-  if (!fs.existsSync(localNotesDir)) fs.mkdirSync(localNotesDir, { recursive: true });
-  if (!fs.existsSync(localResearchDir)) fs.mkdirSync(localResearchDir, { recursive: true });
-  if (!fs.existsSync(localLogsBecario)) {
-    fs.mkdirSync(localLogsBecario, { recursive: true });
-    console.log('  -> Carpeta councils/logs_becario/ creada (logs del becario local, ignorada por Git).');
-  }
-  
-  const agents = ['architect', 'cfo', 'orchestrator', 'niche_researcher', 'comparative_researcher'];
-  for (const a of agents) {
-    const nFile = path.join(localNotesDir, `${a}_notes.md`);
-    const rFile = path.join(localResearchDir, `${a}_research.md`);
-    if (!fs.existsSync(nFile)) {
-      fs.writeFileSync(nFile, `# Opiniones y Notas sobre la Situación Actual — ${a.toUpperCase()}\n\n*[Escribe aquí tus conclusiones y opiniones]*\n`, 'utf8');
-    }
-    if (!fs.existsSync(rFile)) {
-      fs.writeFileSync(rFile, `# Datos y Fuentes de Investigación (Scraped) — ${a.toUpperCase()}\n\nÚltima actualización: Nunca\n\n## Fuentes Recientes\n*(Sin datos cargados. Corre el script de scrapeo para actualizar)*\n`, 'utf8');
-    }
-  }
-}
-
-// 9. Configurar Tareas Programadas en Windows si aplica
+// 8. Configurar Tareas Programadas en Windows si aplica (Solo Auditoría de Memoria Semanal)
 if (os.platform() === 'win32') {
   console.log('Configurando Tareas Programadas en Windows...');
   
-  const nodeExe = process.execPath;
-  const scrapeScript = path.join(CURRENT_DIR, 'councils', 'scrape.js');
-  
-  try {
-    const cmdDaily = `schtasks /create /tn "ObsidianDailyScraper" /tr "\\\"${nodeExe}\\\" \\\"${scrapeScript}\\\"" /sc daily /st 09:00 /f`;
-    execSync(cmdDaily, { stdio: 'ignore' });
-    execSync(`powershell -Command "Set-ScheduledTask -TaskName 'ObsidianDailyScraper' -Settings (New-ScheduledTaskSettingsSet -StartWhenAvailable)"`, { stdio: 'ignore' });
-    console.log('  -> Tarea programada "ObsidianDailyScraper" registrada/actualizada con éxito (con ejecución inmediata si se pierde el horario).');
-  } catch (err) {
-    console.log('  -> Nota: No se pudo registrar la tarea ObsidianDailyScraper automáticamente.');
-  }
-
   let bashPath = 'bash.exe';
   const possibleBashPaths = [
     'C:\\Program Files\\Git\\bin\\bash.exe',
