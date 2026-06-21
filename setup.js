@@ -131,10 +131,56 @@ try {
     
     // Escribir a global
     const globalSkillDir = path.join(CLAUDE_DIR, 'skills', skillName);
-    if (!fs.existsSync(globalSkillDir)) fs.mkdirSync(globalSkillDir, { recursive: true });
+    if (!fs.existsSync(globalSkillDir)) {
+      fs.mkdirSync(globalSkillDir, { recursive: true });
+    }
+    const globalSkillMdPath = path.join(globalSkillDir, 'SKILL.md');
+    if (!fs.existsSync(globalSkillMdPath)) {
+      const template = \`---
+name: \${skillName}
+description: Skill auto-generada para \${skillName}. Se activa proactivamente al programar lógica relacionada.
+---
+
+# \${skillName.replace(/-/g, ' ').replace(/\\\\b\\\\w/g, c => c.toUpperCase())}
+
+Habilidad auto-generada mediante el flujo de Auto-Forge a partir de observaciones de Engram.
+
+## Reglas y Directrices
+- Sigue las convenciones establecidas para esta temática.
+\`;
+      fs.writeFileSync(globalSkillMdPath, template, 'utf8');
+    }
     fs.appendFileSync(globalLearningsPath, entry, 'utf8');
     
     // Escribir a local
+    if (projectDir && fs.existsSync(projectDir)) {
+      const localSkillsDir = path.join(projectDir, 'skills');
+      if (fs.existsSync(localSkillsDir)) {
+        const localSkillDir = path.join(localSkillsDir, skillName);
+        if (!fs.existsSync(localSkillDir)) {
+          fs.mkdirSync(localSkillDir, { recursive: true });
+        }
+        const localSkillMdPath = path.join(localSkillDir, 'SKILL.md');
+        if (!fs.existsSync(localSkillMdPath)) {
+          const template = \`---
+name: \${skillName}
+description: Skill auto-generada para \${skillName}. Se activa proactivamente al programar lógica relacionada.
+---
+
+# \${skillName.replace(/-/g, ' ').replace(/\\\\b\\\\w/g, c => c.toUpperCase())}
+
+Habilidad auto-generada mediante el flujo de Auto-Forge a partir de observaciones de Engram.
+
+## Reglas y Directrices
+- Sigue las convenciones establecidas para esta temática.
+\`;
+          fs.writeFileSync(localSkillMdPath, template, 'utf8');
+        }
+        const localSkillLearningsPath = path.join(localSkillDir, 'learnings.md');
+        fs.appendFileSync(localSkillLearningsPath, entry, 'utf8');
+      }
+    }
+    
     if (localLearningsPath) {
       fs.appendFileSync(localLearningsPath, entry, 'utf8');
     }
