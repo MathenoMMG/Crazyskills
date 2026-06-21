@@ -26,6 +26,20 @@ for (const dir of dirs) {
   }
 }
 
+const localClaudeDir = path.join(CURRENT_DIR, '.claude');
+const localDirs = [
+  localClaudeDir,
+  path.join(localClaudeDir, 'commands'),
+  path.join(localClaudeDir, 'agents'),
+  path.join(localClaudeDir, 'skills'),
+];
+
+for (const dir of localDirs) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
 // 2. Copiar y adaptar scripts (reemplazando rutas del usuario original)
 const scripts = ['obsidian-capture.sh', 'obsidian-flush.sh', 'weekly-audit.sh', 'weekly-review.sh'];
 
@@ -133,13 +147,15 @@ try {
 fs.writeFileSync(path.join(CLAUDE_DIR, 'hooks', 'auto-forge.js'), autoForgeContent, 'utf8');
 
 // 3. Crear slash commands
-const commands = ['obs.md', 'forge.md', 'mem.md'];
+const commands = ['obs.md', 'forge.md', 'mem.md', 'rese.md'];
 for (const c of commands) {
   const srcPath = path.join(CURRENT_DIR, c);
   if (fs.existsSync(srcPath)) {
     const content = fs.readFileSync(srcPath, 'utf8');
     fs.writeFileSync(path.join(CLAUDE_DIR, 'commands', c), content, 'utf8');
     fs.writeFileSync(path.join(CLAUDE_DIR, 'agents', c), content, 'utf8');
+    fs.writeFileSync(path.join(localClaudeDir, 'commands', c), content, 'utf8');
+    fs.writeFileSync(path.join(localClaudeDir, 'agents', c), content, 'utf8');
   }
 }
 
@@ -184,7 +200,16 @@ Para evitar lecturas masivas y búsquedas probabilísticas, la memoria del proye
   1. Utiliza \`grep_search\` para ubicar las declaraciones y todos los usos (referencias cruzadas) de una clase, función o constante.
   2. Lee el archivo alrededor de la coincidencia (típicamente desde 20 líneas antes hasta 50 líneas después) para captar el contexto funcional.
   3. Revisa los tests unitarios del componente; las pruebas son la documentación más veraz y el mejor ejemplo de uso de la API interna.
-- **Ventana de Contexto (Presupuesto de 150K):** Para proyectos grandes, el límite máximo de tolerancia de tokens acumulados en la sesión antes de sugerir un reinicio o \`/compact\` se establece en **150,000 tokens**. Mantén la sesión por debajo de este presupuesto para evitar latencia extrema y degradación de la atención del LLM.`;
+- **Ventana de Contexto (Presupuesto de 150K):** Para proyectos grandes, el límite máximo de tolerancia de tokens acumulados en la sesión antes de sugerir un reinicio o \`/compact\` se establece en **150,000 tokens**. Mantén la sesión por debajo de este presupuesto para evitar latencia extrema y degradación de la atención del LLM.
+
+## 6. Revelación Progresiva (Progressive Disclosure)
+Para evitar el bloat de contexto y optimizar el presupuesto de tokens, las skills especializadas no se cargan todas de golpe. El agente debe seleccionar y cargar dinámicamente solo las skills necesarias para resolver la tarea en curso (ej. cargar \`security-hardening\` solo al modificar autenticación, red o filesystem).
+
+## 7. Quality Gates y Plan-Before-Code
+Cualquier modificación no trivial de código requiere la validación de un plan de diseño por parte del usuario. Antes de dar por completado un cambio, el código debe validarse mediante sintaxis de compilación (\`node -c\`) y pruebas de unidad (TDD) en el sandbox local.
+
+## 8. Threat Modeling y Hardening Colectivo
+Antes de realizar cambios sensibles que manipulen variables de entorno, APIs externas o acceso no supervisado a disco, se debe invocar proactivamente el protocolo de la skill \`obsidian-challenge\` para auditar vectores de ataque e inyecciones indirectas.`;
 fs.writeFileSync(path.join(CLAUDE_DIR, 'principles.md'), principlesContent, 'utf8');
 
 // 6. Crear Junction Link para Antigravity si es Windows

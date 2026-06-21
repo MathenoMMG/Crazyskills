@@ -102,16 +102,61 @@ function writeInternLog({ mode, prompt, skill, response, sandboxPassed, security
   ].filter(l => l !== null).join('\n');
 
   fs.writeFileSync(logFile, content, 'utf8');
+
+  // Rotación de logs: máximo 30 archivos
+  try {
+    const files = fs.readdirSync(LOGS_DIR)
+      .filter(f => f.startsWith('log_') && f.endsWith('.md'))
+      .map(f => ({
+        name: f,
+        path: path.join(LOGS_DIR, f),
+        time: fs.statSync(path.join(LOGS_DIR, f)).mtime.getTime()
+      }))
+      .sort((a, b) => a.time - b.time);
+
+    if (files.length > 30) {
+      const toDelete = files.slice(0, files.length - 30);
+      for (const file of toDelete) {
+        fs.unlinkSync(file.path);
+        console.log(`[Rotación de Logs] Eliminado log antiguo: ${file.name}`);
+      }
+    }
+  } catch (err) {
+    console.error('[Error] Fallo al rotar los logs del becario:', err.message);
+  }
+
   return { logFile, securityFindings: securityFindings || [] };
+}
+
+// 1.b Extractor de código limpio (markdown codeblocks helper)
+function extractCode(text) {
+  if (!text) return '';
+  const regex = /```(?:javascript|js)\b([\s\S]*?)```/;
+  const match = text.match(regex);
+  if (match && match[1]) {
+    return match[1].trim();
+  }
+  const generalRegex = /```([\s\S]*?)```/;
+  const generalMatch = text.match(generalRegex);
+  if (generalMatch && generalMatch[1]) {
+    return generalMatch[1].trim();
+  }
+  return text.trim();
 }
 
 // 2. Cliente HTTP nativo para conectar con Ollama sin dependencias externas
 function queryOllama(prompt, model = DEFAULT_MODEL) {
   return new Promise((resolve, reject) => {
+    const apiOptions = {};
+    if (model.includes('7b')) {
+      apiOptions.num_gpu = 15; // Cargar sólo 15 capas en la GPU dedicada, dejando el resto en la CPU/RAM para mantener margen de VRAM
+    }
     const payload = JSON.stringify({
       model: model,
       prompt: sanitizeText(prompt),
-      stream: false
+      stream: false,
+      keep_alive: 0,
+      options: apiOptions
     });
 
     const options = {
@@ -238,7 +283,7 @@ async function run() {
 
   if (mode === '--test') {
     console.log('=== TEST DE INTEGRACIÓN DE OLLAMA ===');
-    const promptTest = 'Escribe una función de suma simple en JS que exporte module.exports = (a, b) => a + b;';
+    const promptTest = 'Escribe una función de suma simple en JS que exporte module.exports = (a, b) => a + b;. Envuélvela en un bloque de código markdown de tipo ```javascript.';
     console.log(`Prompt: "${promptTest}"`);
     console.log('Conectando a Ollama local...');
     
@@ -246,7 +291,7 @@ async function run() {
       const response = await queryOllama(promptTest);
       const tempFile = path.join(SCRATCH_DIR, 'test_suma.js');
       
-      let cleanCode = response.replace(/```javascript|```js|```/g, '').trim();
+      let cleanCode = extractCode(response);
       fs.writeFileSync(tempFile, cleanCode, 'utf8');
       console.log(`Código escrito en sandbox: ${tempFile}`);
 
@@ -278,13 +323,13 @@ async function run() {
     console.log('Generando código con Ollama...');
 
     try {
-      let fullPrompt = prompt;
+      let fullPrompt = prompt + '\n\nEscribe el código limpio de JavaScript envuelto en un bloque de código markdown de tipo ```javascript. No agregues explicaciones externas.';
       if (skillPromptContent) {
-        fullPrompt = `${skillPromptContent}\n\nRequisito del usuario: ${prompt}\n\nEscribe el código siguiendo estrictamente las instrucciones de la skill anterior. No agregues introducciones amigables, solo el código limpio de JavaScript.`;
+        fullPrompt = `${skillPromptContent}\n\nRequisito del usuario: ${prompt}\n\nEscribe el código siguiendo estrictamente las instrucciones de la skill anterior. Envuélvelo en un bloque de código markdown de tipo \`\`\`javascript sin explicaciones externas.`;
       }
       
       const response = await queryOllama(fullPrompt);
-      let cleanCode = response.replace(/```javascript|```js|```/g, '').trim();
+      let cleanCode = extractCode(response);
       fs.writeFileSync(tempFile, cleanCode, 'utf8');
       console.log(`Código escrito en sandbox: ${tempFile}`);
 
